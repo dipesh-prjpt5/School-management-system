@@ -8,10 +8,6 @@ const RoleSchema = new Schema({
     required: true,
     unique: true,
   },
-  permissions: {
-    type: [String],
-    default: [],
-  },
 });
 
 module.exports = mongoose.model("Role", RoleSchema);

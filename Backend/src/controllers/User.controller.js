@@ -35,7 +35,7 @@ const createUser = async (req, res, next) => {
     return res.status(StatusCodes.OK).json({
       success: true,
       message: "User created successfully",
-      newUser
+      newUser,
     });
   } catch (error) {
     next(error);
@@ -52,11 +52,56 @@ const getallUsers = async (req, res, next) => {
       allUsers,
     });
   } catch (error) {
-    next(error)
+    next(error);
+  }
+};
+
+const getOneUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: "User found",
+      user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const deletedUser = await User.findByIdAndDelete(id);
+
+    if (!deletedUser) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
 module.exports = {
   createUser,
   getallUsers,
+  getOneUser,
+  deleteUser,
 };

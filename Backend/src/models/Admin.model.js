@@ -20,10 +20,23 @@ const AdminSchema = new Schema(
       type: String,
       required: true,
     },
+    address_id: {
+      type: Schema.Types.ObjectId,
+      ref: "Address",
+    },
   },
   {
     timestamps: true,
   }
 );
+
+AdminSchema.pre("findOneAndDelete", async function (next) {
+  const admin = await this.model.findOne(this.getQuery());
+  if (admin?.address_id) {
+    await mongoose.model("Address").findByIdAndDelete(admin.address_id);
+  }
+  next();
+});
+
 
 module.exports = mongoose.model("Admin", AdminSchema);

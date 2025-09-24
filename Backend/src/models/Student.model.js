@@ -29,10 +29,23 @@ const StudentSchema = new Schema(
       ref: "Admin",
       required: true,
     },
+    address_id: {
+      type: Schema.Types.ObjectId,
+      ref: "Address",
+    },
   },
   {
     timestamps: true,
   }
 );
+
+StudentSchema.pre("findOneAndDelete", async function (next) {
+  const student = await this.model.findOne(this.getQuery());
+  if (student?.address_id) {
+    await mongoose.model("Address").findByIdAndDelete(student.address_id);
+  }
+  next();
+});
+
 
 module.exports = mongoose.model("Student", StudentSchema);

@@ -18,7 +18,7 @@ const TeacherSchema = new Schema(
     },
     salary: {
       type: Number,
-      require: true,
+      required: true,
     },
     phone: {
       type: String,
@@ -29,10 +29,23 @@ const TeacherSchema = new Schema(
       ref: "Admin",
       required: true,
     },
+    address_id: {
+      type: Schema.Types.ObjectId,
+      ref: "Address",
+    },
   },
   {
     timestamps: true,
   }
 );
+
+TeacherSchema.pre("findOneAndDelete", async function (next) {
+  const teacher = await this.model.findOne(this.getQuery());
+  if (teacher?.address_id) {
+    await mongoose.model("Address").findByIdAndDelete(teacher.address_id);
+  }
+  next();
+});
+
 
 module.exports = mongoose.model("Teacher", TeacherSchema);

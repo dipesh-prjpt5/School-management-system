@@ -1,25 +1,34 @@
 const { StatusCodes } = require("http-status-codes");
-const { Student } = require("../models");
+const { Student, Address, User } = require("../models");
 
 // creating student route
 const createStudent = async (req, res, next) => {
   try {
     // cheking for all fields
     const {
+      house_no,
+      street,
+      city,
+      state,
+      postal_code,
       user_id,
       first_name,
       last_name,
       phone,
-      email,
       date_of_birth,
       created_by,
     } = req.body;
+
     if (
+      !house_no ||
+      !street ||
+      !city ||
+      !state ||
+      !postal_code ||
       !user_id ||
       !first_name ||
       !last_name ||
       !phone ||
-      !email ||
       !date_of_birth ||
       !created_by
     ) {
@@ -30,26 +39,36 @@ const createStudent = async (req, res, next) => {
     }
 
     // cheking for existing user
-    const existingUser = await Student.findOne({ email });
+    const existingUser = await User.findOne({ user_id });
     if (existingUser) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "Student Already exists!",
+        message: "User Already exists!",
       });
     }
 
-    // creating new user
-    const newStudent = new Student({
-      user_id: user_id,
-      first_name: first_name,
-      last_name: last_name,
-      phone: phone,
-      email: email,
-      date_of_birth: date_of_birth,
-      created_by: created_by,
+    const address = new Address({
+      house_no,
+      street,
+      city,
+      state,
+      postal_code,
     });
 
-    await newStudent.save();
+    const savedAddress = await address.save();
+
+    // creating new user
+    const newStudent = new Student({
+      user_id,
+      first_name,
+      last_name,
+      phone,
+      date_of_birth,
+      created_by,
+      address_id: savedAddress._id,
+    });
+
+    const savedStudent = await newStudent.save();
 
     return res.status(StatusCodes.CREATED).json({
       success: true,
@@ -72,6 +91,7 @@ const getAllStudent = async (req, res, next) => {
           select: "name permissions",
         },
       },
+      { path: "address_id" },
     ]);
 
     res.status(StatusCodes.OK).json({
@@ -97,38 +117,20 @@ const findOneStudents = async (req, res, next) => {
           select: "name permissions",
         },
       },
+      { path: "address_id" },
     ]);
 
     if (!student) {
-      res.status(StatusCodes.NOT_FOUND).json({
+      return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
         message: "Student not found",
       });
     }
 
-    res.status(StatusCodes.OK).json({
+    return res.status(StatusCodes.OK).json({
       success: true,
       message: "Student found",
       student,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const deleteStudent = async (req, res, next) => {
-  try {
-    const delete_student = await Student.findByIdAndDelete(req.params.id);
-
-    if (!delete_student) {
-      res.status(StatusCodes.NOT_FOUND).json({
-        success: false,
-        message: "Student not found",
-      });
-    }
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Student deleted",
     });
   } catch (error) {
     next(error);
@@ -139,5 +141,4 @@ module.exports = {
   createStudent,
   getAllStudent,
   findOneStudents,
-  deleteStudent,
 };

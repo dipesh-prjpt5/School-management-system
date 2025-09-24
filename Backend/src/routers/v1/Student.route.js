@@ -9,6 +9,4 @@ router.get("/", studentContollers.getAllStudent);
 
 router.get("/:id", studentContollers.findOneStudents);
 
-router.delete("/:id", studentContollers.deleteStudent);
-
 module.exports = router;

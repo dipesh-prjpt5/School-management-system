@@ -9,6 +9,4 @@ router.get("/", teacherControllers.getAllTeachers);
 
 router.get("/:id", teacherControllers.findOneTeacher);
 
-router.delete("/:id", teacherControllers.deleteTeacher);
-
 module.exports = router;

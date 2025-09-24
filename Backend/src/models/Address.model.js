@@ -3,11 +3,6 @@ const { Schema } = mongoose;
 
 const AddressSchema = new Schema(
   {
-    user_id: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
     house_no: {
       type: String,
       required: true,

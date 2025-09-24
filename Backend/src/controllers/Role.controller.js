@@ -41,4 +41,17 @@ const createRole = async (req, res, next) => {
   }
 };
 
-module.exports = { createRole };
+const getAllRoles = async (req, res, next) => {
+  try {
+    const roles = await Role.find();
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Roles fetched successfully",
+      roles,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { createRole, getAllRoles };
