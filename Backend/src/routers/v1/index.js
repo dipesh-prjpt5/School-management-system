@@ -1,5 +1,6 @@
 const express = require("express");
 
+const authRouter = require("./Auth.route.js");
 const studentRouter = require("./Student.route.js");
 const teacherRouter = require("./Teacher.route.js");
 const adminRouter = require("./Admin.route.js");
@@ -8,6 +9,8 @@ const roleRouter = require("./Role.route.js");
 const addressRouter = require("./Address.route.js");
 
 const router = express.Router();
+
+router.use("/auth", authRouter);
 
 router.use("/user", userRouter);
 

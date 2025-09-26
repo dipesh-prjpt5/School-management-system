@@ -1,41 +1,79 @@
 const { StatusCodes } = require("http-status-codes");
-const { Admin } = require("../models");
+const { Admin, Address, User } = require("../models");
 
 // creating student route
 const createAdmin = async (req, res, next) => {
   try {
-    // cheking for all fields
-    const { first_name, last_name, phone, email } = req.body;
-    if (!first_name || !last_name || !phone || !email) {
+    const {
+      user_id,
+      first_name,
+      last_name,
+      phone,
+      house_no,
+      street,
+      city,
+      state,
+      postal_code,
+    } = req.body;
+
+    // Check for required fields
+    if (
+      !user_id || !first_name || !last_name || !phone ||
+      !house_no || !street || !city || !state || !postal_code
+    ) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
         message: "All fields are required!",
       });
     }
 
-    // cheking for existing user
-    const existingAdmin = await Admin.findOne({ email });
-    if (existingAdmin) {
+    // Check if user exists
+    const user = await User.findById(user_id).populate("role");
+    if (!user) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "Admin Already exists!",
+        message: "User does not exist",
       });
     }
 
-    // creating new user
+    // Check user role
+    if (user.role.name !== "admin") {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "User is not an admin",
+      });
+    }
+
+    // Check if admin profile already exists
+    const existingAdmin = await Admin.findOne({ user_id });
+    if (existingAdmin) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "Admin profile already exists for this user",
+      });
+    }
+
+    // Create address
+    const address = new Address({ house_no, street, city, state, postal_code });
+    const savedAddress = await address.save();
+
+    // Create admin profile
     const newAdmin = new Admin({
-      first_name: first_name,
-      last_name: last_name,
-      phone: phone,
-      email: email,
+      user_id,
+      first_name,
+      last_name,
+      phone,
+      address_id: savedAddress._id,
     });
 
     await newAdmin.save();
 
     return res.status(StatusCodes.CREATED).json({
       success: true,
-      message: "Admin created successfully",
+      message: "Admin profile created successfully",
+      admin: newAdmin,
     });
+
   } catch (error) {
     next(error);
   }

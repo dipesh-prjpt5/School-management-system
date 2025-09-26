@@ -4,33 +4,14 @@ const { Student, Address, User } = require("../models");
 // creating student route
 const createStudent = async (req, res, next) => {
   try {
-    // cheking for all fields
     const {
-      house_no,
-      street,
-      city,
-      state,
-      postal_code,
-      user_id,
-      first_name,
-      last_name,
-      phone,
-      date_of_birth,
-      created_by,
+      house_no, street, city, state, postal_code,
+      user_id, first_name, last_name, phone, date_of_birth, created_by
     } = req.body;
 
     if (
-      !house_no ||
-      !street ||
-      !city ||
-      !state ||
-      !postal_code ||
-      !user_id ||
-      !first_name ||
-      !last_name ||
-      !phone ||
-      !date_of_birth ||
-      !created_by
+      !house_no || !street || !city || !state || !postal_code ||
+      !user_id || !first_name || !last_name || !phone || !date_of_birth || !created_by
     ) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
@@ -38,26 +19,37 @@ const createStudent = async (req, res, next) => {
       });
     }
 
-    // cheking for existing user
-    const existingUser = await User.findOne({ user_id });
-    if (existingUser) {
+    // Check if user exists
+    const user = await User.findById(user_id).populate("role");
+    if (!user) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "User Already exists!",
+        message: "User does not exist",
       });
     }
 
-    const address = new Address({
-      house_no,
-      street,
-      city,
-      state,
-      postal_code,
-    });
+    // Check user role
+    if (user.role.name !== "student") {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "User is not a student",
+      });
+    }
 
+    // Check if student profile already exists
+    const existingStudent = await Student.findOne({ user_id });
+    if (existingStudent) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "Student profile already exists for this user",
+      });
+    }
+
+    // Create address
+    const address = new Address({ house_no, street, city, state, postal_code });
     const savedAddress = await address.save();
 
-    // creating new user
+    // Create student
     const newStudent = new Student({
       user_id,
       first_name,
@@ -67,13 +59,14 @@ const createStudent = async (req, res, next) => {
       created_by,
       address_id: savedAddress._id,
     });
-
     const savedStudent = await newStudent.save();
 
     return res.status(StatusCodes.CREATED).json({
       success: true,
-      message: "User created successfully",
+      message: "Student profile created successfully",
+      student: savedStudent,
     });
+
   } catch (error) {
     next(error);
   }

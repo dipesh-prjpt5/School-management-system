@@ -7,6 +7,7 @@ const AdminSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      unique: true,
     },
     first_name: {
       type: String,
@@ -37,6 +38,5 @@ AdminSchema.pre("findOneAndDelete", async function (next) {
   }
   next();
 });
-
 
 module.exports = mongoose.model("Admin", AdminSchema);
