@@ -1,14 +1,21 @@
 const express = require("express");
 const { userContollers } = require("../../controllers");
+const { VerifyUserToken, RoleAuthorization } = require("../../middlewares");
 
 const router = express.Router();
 
-router.post("/", userContollers.createUser);
+router.post(
+  "/",
+  VerifyUserToken,
+  RoleAuthorization("admin"),
+  userContollers.createUser
+);
 
-router.get("/", userContollers.getallUsers);
-
-router.get("/:id", userContollers.getOneUser);
-
-router.delete("/:id", userContollers.deleteUser);
+router.delete(
+  "/:id",
+  VerifyUserToken,
+  RoleAuthorization("admin"),
+  userContollers.deleteUser
+);
 
 module.exports = router;

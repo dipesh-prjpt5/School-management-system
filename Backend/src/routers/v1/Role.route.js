@@ -1,10 +1,21 @@
 const express = require("express");
 const { roleControllers } = require("../../controllers");
+const { VerifyUserToken, RoleAuthorization } = require("../../middlewares");
 
 const router = express.Router();
 
-router.post("/", roleControllers.createRole);
+router.post(
+  "/",
+  VerifyUserToken,
+  RoleAuthorization("admin"),
+  roleControllers.createRole
+);
 
-router.get("/", roleControllers.getAllRoles);
+router.get(
+  "/",
+  VerifyUserToken,
+  RoleAuthorization("admin"),
+  roleControllers.getAllRoles
+);
 
 module.exports = router;

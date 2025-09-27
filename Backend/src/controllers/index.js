@@ -1,5 +1,5 @@
 module.exports = {
-  authControllers: require("./UserAuth.controller.js"),
+  authControllers: require("./Auth.controller.js"),
   userContollers: require("./User.controller.js"),
   studentContollers: require("./Student.controller.js"),
   teacherControllers: require("./Teacher.controller.js"),
